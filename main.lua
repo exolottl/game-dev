@@ -4,54 +4,72 @@ _G.love = require("love")
 --]]
 
 function love.load()
-  love.graphics.setBackgroundColor(0.5, 0.4, 0.6)
-  _G.pacman = {}
-  pacman.x = 100
-  pacman.y = 200
-  pacman.x_angle = 5
-  pacman.y_angle = 1
-  pacman.eat = false
+  Gandalf = {
+    x = 10,
+    y = 10,
+    sprite = love.graphics.newImage("/spirtesheet/spritesheet.png"),
+    animation = {
+      direction = "right",
+      idle = true,
+      frame = 4,
+      max_frames = 6,
+      speed = 50,
+      timer = 0.1,
+    },
+  }
 
-  _G.food = {}
-  food.x = 400
-  food.eaten = false
+  Width, Height = 3000, 2000
+
+  QuadWidth, QuadHeight = 1000, 1000
+  Quads = {}
+
+  for row = 0, 1 do
+    for col = 0, 2 do
+      local index = row * 3 + col + 1
+      Quads[index] =
+          love.graphics.newQuad(QuadWidth * col, QuadHeight * row, QuadWidth, QuadHeight, Width, Height)
+    end
+  end
 end
 
 function love.update(dt)
-  if love.keyboard.isDown("down") and love.keyboard.isDown("d") then
-    pacman.y_angle = pacman.y_angle - (math.pi * dt)
-    pacman.x_angle = pacman.x_angle - (math.pi * dt)
-    pacman.x = pacman.x + 10
-  elseif love.keyboard.isDown("down") and love.keyboard.isDown("a") then
-    pacman.y_angle = pacman.y_angle - (math.pi * dt)
-    pacman.x_angle = pacman.x_angle - (math.pi * dt)
-    pacman.x = pacman.x - 10
-  end
-
-  if love.keyboard.isDown("a") then
-    pacman.x = pacman.x - 1
-  end
-  if love.keyboard.isDown("s") then
-    pacman.y = pacman.y + 1
-  end
   if love.keyboard.isDown("d") then
-    pacman.x = pacman.x + 1
-  end
-  if love.keyboard.isDown("w") then
-    pacman.y = pacman.y - 1
+    Gandalf.animation.idle = false
+    Gandalf.animation.direction = "right"
+  elseif love.keyboard.isDown("a") then
+    Gandalf.animation.idle = false
+    Gandalf.animation.direction = "left"
+  else
+    Gandalf.animation.idle = true
+    Gandalf.animation.frame = 4
   end
 
-  if pacman.x >= food.x - 20 then
-    food.eaten = true
+  if not Gandalf.animation.idle then
+    Gandalf.animation.timer = Gandalf.animation.timer + dt
+
+    if Gandalf.animation.timer > 0.2 then
+      Gandalf.animation.timer = 0.1
+
+      Gandalf.animation.frame = Gandalf.animation.frame + 1
+
+      if Gandalf.animation.direction == "right" then
+        Gandalf.x = Gandalf.x + Gandalf.animation.speed
+      elseif Gandalf.animation.direction == "left" then
+        Gandalf.x = Gandalf.x - Gandalf.animation.speed
+      end
+      if Gandalf.animation.frame > Gandalf.animation.max_frames then
+        Gandalf.animation.frame = 1
+      end
+    end
   end
 end
 
 function love.draw()
-  if not food.eaten then
-    love.graphics.setColor(0.7, 0.8, 0.2)
-    love.graphics.rectangle("fill", food.x, 200, 50, 50)
-  end
+  love.graphics.scale(0.1)
 
-  love.graphics.setColor(0.3, 0.2, 0.2)
-  love.graphics.arc("fill", pacman.x, pacman.y, 50, pacman.y_angle, pacman.x_angle)
+  if Gandalf.animation.direction == "right" then
+    love.graphics.draw(Gandalf.sprite, Quads[Gandalf.animation.frame], Gandalf.x, Gandalf.y)
+  else
+    love.graphics.draw(Gandalf.sprite, Quads[Gandalf.animation.frame], Gandalf.x, Gandalf.y, 0 , -1, 1, QuadWidth, 0)
+  end
 end
