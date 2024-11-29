@@ -4,5 +4,5 @@ function love.conf(t)
   t.gammacorrect = true
   t.audio.mic = true
   t.window.title = "ball game"
-  t.window.fullscree = true
+  t.window.display = 2
 end
